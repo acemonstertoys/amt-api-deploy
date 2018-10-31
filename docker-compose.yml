@@ -1,5 +1,14 @@
 version: '2'
 services:
+        # Start nginx
+        nginx:
+                image: nginx:latest
+                ports:
+                        - "8080:80"
+                volumes:
+                        - ./default.conf:/etc/nginx/conf.d/defaut.conf
+                links:
+                        - app
         # Start the standard MongoDB container
         mongodb:
                 container_name: "mongodb"
@@ -16,7 +25,7 @@ services:
                         - "27017:27017"
                 # start mongodb
                 command: mongod --smallfiles
-        web:
+        app:
                 container_name: "amt-api"
                 build: .
                 restart: always
