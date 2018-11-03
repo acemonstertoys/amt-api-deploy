@@ -1,20 +1,21 @@
 version: '2'
 services:
-        # Start nginx
+        # The web proxy server
         nginx:
                 image: nginx:latest
                 ports:
-                        - "8080:80"
+                        - "80:80" # open port 80 for HTTP requests
                 volumes:
-                        - ./default.conf:/etc/nginx/conf.d/defaut.conf
+                        - ./.:/code
+                        - ./nginx.conf:/etc/nginx/nginx.conf # copy the nginx configuration to the container
                 links:
-                        - app
+                        - amt-api # this needs the api to be running
         # Start the standard MongoDB container
         mongodb:
                 container_name: "mongodb"
-                image: mongo:latest
+                image: mongo:latest # pull the current mongodb image
                 environment:
-                        - MONGO_DATA_DIR=/data/db
+                        - MONGO_DATA_DIR=/data/db # setup the location of the data
                         - MONGO_LOG_DIR=/dev/log
                 # persist the data on the host rather than in the container
                 # this makes the container disposable without losing the data
@@ -25,9 +26,10 @@ services:
                         - "27017:27017"
                 # start mongodb
                 command: mongod --smallfiles
-        app:
+        # The AMT API
+        amt-api:
                 container_name: "amt-api"
-                build: .
+                image: acemonstertoys/amt-api:0.0.0 # this will let us version the api in the future, if we want to
                 restart: always
                 # link the API to the mongoDB container
                 links:
@@ -37,4 +39,4 @@ services:
                         - mongodb
                 # forward the web port to the server's port
                 ports:
-                        - "3000:8080"
+                        - "8080:8080"
